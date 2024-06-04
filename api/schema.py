@@ -26,14 +26,19 @@ class DirectorType(DjangoObjectType):
 class MovieNode(DjangoObjectType):
     class Meta:
         model = Movie
-        filter_fields = ['title', 'year',]
+        # filter_fields = ['title', 'year',]
+        filter_fields = {
+            'title': ['exact', 'icontains', 'istartswith'], 
+            'year': ['exact']
+        }
         interfaces = (relay.Node,)
 
 
 class Query(graphene.ObjectType):
     # all_movies = graphene.List(MovieType)
     all_movies = DjangoFilterConnectionField(MovieNode)
-    movie = graphene.Field(MovieType, id=graphene.Int(), title=graphene.String())
+    # movie = graphene.Field(MovieType, id=graphene.Int(), title=graphene.String())
+    movie = relay.Node.Field(MovieNode)
     
     all_directors = graphene.List(DirectorType)
     
@@ -46,17 +51,17 @@ class Query(graphene.ObjectType):
         
     #     return Movie.objects.all()
     
-    def resolve_movie(self, info, **kwargs):
-        id = kwargs.get('id')
-        title = kwargs.get('title')
+    # def resolve_movie(self, info, **kwargs):
+    #     id = kwargs.get('id')
+    #     title = kwargs.get('title')
         
-        if id is not None:
-            return Movie.objects.get(pk=id)
+    #     if id is not None:
+    #         return Movie.objects.get(pk=id)
         
-        if title is not None:
-            return Movie.objects.get(title=title)
+    #     if title is not None:
+    #         return Movie.objects.get(title=title)
         
-        return None
+    #     return None
     
     def resolve_all_directors(self, info, **kwargs):
         return Director.objects.all()
