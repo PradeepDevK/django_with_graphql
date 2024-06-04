@@ -1,7 +1,9 @@
 import graphene
+from graphene import relay
 import graphql_jwt
 from graphene_django.types import DjangoObjectType
 from graphql_jwt.decorators import login_required 
+from graphene_django.filter import DjangoFilterConnectionField
 
 from api.models import (Movie, Director,)
 
@@ -20,21 +22,29 @@ class DirectorType(DjangoObjectType):
     class Meta:
         model = Director
         
+# just for relay implementation
+class MovieNode(DjangoObjectType):
+    class Meta:
+        model = Movie
+        filter_fields = ['title', 'year',]
+        interfaces = (relay.Node,)
+
 
 class Query(graphene.ObjectType):
-    all_movies = graphene.List(MovieType)
+    # all_movies = graphene.List(MovieType)
+    all_movies = DjangoFilterConnectionField(MovieNode)
     movie = graphene.Field(MovieType, id=graphene.Int(), title=graphene.String())
     
     all_directors = graphene.List(DirectorType)
     
-    @login_required
-    def resolve_all_movies(self, info, **kwargs):
-        #Auth
-        # user = info.context.user
-        # if not user.is_authenticated:
-        #     raise Exception('Auth credentials were not provided')
+    # @login_required
+    # def resolve_all_movies(self, info, **kwargs):
+    #     #Auth
+    #     # user = info.context.user
+    #     # if not user.is_authenticated:
+    #     #     raise Exception('Auth credentials were not provided')
         
-        return Movie.objects.all()
+    #     return Movie.objects.all()
     
     def resolve_movie(self, info, **kwargs):
         id = kwargs.get('id')

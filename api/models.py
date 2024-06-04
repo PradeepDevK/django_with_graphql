@@ -15,5 +15,8 @@ class Movie(models.Model):
     year = models.IntegerField(default=2000)
     director = models.ForeignKey(Director, on_delete=models.PROTECT, blank=True, null = True)
     
+    class Meta:
+        ordering = ['id',]
+    
     def __str__(self):
         return self.title
